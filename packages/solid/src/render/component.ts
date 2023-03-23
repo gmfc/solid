@@ -243,19 +243,12 @@ export type SplitProps<T, K extends (readonly (keyof T)[])[]> = [
   Omit<T, K[number][number]>
 ];
 
-function flatten(array: any[]){
-  return array.reduce(
-		(flattened, elem) =>
-			flattened.concat(Array.isArray(elem) ? flatten(elem) : elem),
-		[]
-	);
-}
-
 export function splitProps<
   T extends Record<any, any>,
   K extends [readonly (keyof T)[], ...(readonly (keyof T)[])[]]
 >(props: T, ...keys: K): SplitProps<T, K> {
-  const blocked = new Set<keyof T>(flatten(keys));
+  const flattenedKeys = keys.reduce((acc, key) => acc.concat(key), []);
+  const blocked = new Set<keyof T>(flattenedKeys);
   if ($PROXY in props) {
     const res = keys.map(k => {
       return new Proxy(
